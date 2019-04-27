@@ -8,7 +8,7 @@ from evdev import InputDevice, categorize, ecodes
 # Global variables
 controller = InputDevice('/dev/input/event0')
 electric_brake = 19
-max_speed_cap = 60
+max_speed_cap = 50
 
 # Pad Controller Commands
 speed_pad = 5

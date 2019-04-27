@@ -31,13 +31,11 @@ def decode_power(power, inputRange, outputRange):
 
 def drive_forward(power):
     decoded_power = decode_power(power, defaultInputRange, (50, 100))
-    print("Decoded Power Forward: " + str(decoded_power))
     motor1.ChangeDutyCycle(decoded_power)
     motor2.ChangeDutyCycle(decoded_power)
 
 def drive_backward(power):
     decoded_power = decode_power(power, defaultInputRange, (50, 0))
-    print("Decoded Power Backward: " + str(decoded_power))
     motor1.ChangeDutyCycle(decoded_power)
     motor2.ChangeDutyCycle(decoded_power)
 
@@ -46,7 +44,6 @@ def drive_right(power):
     negative_decoded_power = decode_power(power, defaultInputRange, (50, 0))
     motor2.ChangeDutyCycle(decoded_power)
     motor1.ChangeDutyCycle(negative_decoded_power)
-    
 
 def drive_left(power):
     decoded_power = decode_power(power, defaultInputRange, (50, 100))
