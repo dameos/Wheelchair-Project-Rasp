@@ -1,6 +1,8 @@
 import RPi.GPIO as GPIO
 import time
+import simplejson
 from pygame import mixer
+
 
 GPIO.setmode(GPIO.BCM)
 
@@ -36,17 +38,20 @@ def sense_distance():
 
 def avg_distance():
     distances = []
-    for i in range(0, 10):
+    for i in range(0, 5):
         distances.append(sense_distance())
     distances.remove(max(distances))
     avg = sum(distances) / len(distances)
     return avg
 
-while 1:
-    avg = avg_distance()
-    print("Distance: " + str(avg) + " cm")
-    if (avg <= 20):
-        sound.play()
-        while(mixer.get_busy()):
-            True
 
+listofsense = []
+try:
+    while 1:
+        sense = avg_distance()
+        listofsense.append(sense)
+
+except KeyboardInterrupt:
+    f = open('output.txt', 'w')
+    simplejson.dump(listofsense, f)
+    f.close()
