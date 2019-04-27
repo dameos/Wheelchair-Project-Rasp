@@ -36,26 +36,22 @@ def handle_state(speed, state_dir):
     str_speed = str(speed)
     if state_dir == 0:
         if speed > 0:
-            GPIO.output(electric_brake, GPIO.LOW)
             motors.drive_forward(speed)
         else:
-            GPIO.output(electric_brake, GPIO.LOW)
             motors.drive_backward(-1 * speed)
 
     if state_dir == 1:
-        GPIO.output(electric_brake, GPIO.LOW)
         motors.drive_right(speed)
 
     if state_dir == -1:
-        GPIO.output(electric_brake, GPIO.LOW)
         motors.drive_left(speed)
 
 gen = get_key_worker()
 while True:
     if (math.trunc(speed) == 0):
-        GPIO.output(electric_brake, GPIO.HIGH)
-    else:
         GPIO.output(electric_brake, GPIO.LOW)
+    else:
+        GPIO.output(electric_brake, GPIO.HIGH)
     event = next(gen)
     if event.code == direction_pad:
         state_dir = event.value
@@ -63,8 +59,5 @@ while True:
         speed = event.value * max_speed_cap / 1023
     if event.code == brake_pad:
         speed = - event.value * max_speed_cap / 1023
-    print(speed)
-    if math.trunc(speed) != 0:
-        GPIO.output(electric_brake, GPIO.LOW)
     handle_state(speed, state_dir)
     time.sleep(0.01)
