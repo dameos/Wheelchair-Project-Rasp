@@ -2,6 +2,7 @@ import sys
 import multiprocessing
 from threading import RLock
 from threading import Thread
+from OnlineVoice import hotword
 from Ultrasonic import ledultrasonic as led
 from Ultrasonic.ultrasonic import Ultrasonic
 from Motors.motors import Motors
@@ -44,8 +45,9 @@ def ultrasonic_security_system():
                 motorLock.release()
         canv = led.create_canvas()
 
+def autopilot_system():
+    hot
+
 def main():
     security_thread = Thread(target=ultrasonic_security_system)
-
-
-
+    hotword.main()

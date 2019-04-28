@@ -27,7 +27,7 @@ from google.assistant.library import Assistant
 from google.assistant.library.event import EventType
 from google.assistant.library.file_helpers import existing_file
 from google.assistant.library.device_helpers import register_device
-from process_event import process_event
+import OnlineVoice.process_event as pe
 
 import faulthandler
 faulthandler.enable()
@@ -123,7 +123,7 @@ def main():
             if event.type == EventType.ON_START_FINISHED and args.query:
                 assistant.send_text_query(args.query)
 
-            process_event(event)
+            return pe.process_event(event)
 
 
 if __name__ == '__main__':

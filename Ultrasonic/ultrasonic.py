@@ -1,6 +1,5 @@
 import RPi.GPIO as IO
 import time
-import simplejson
 from pygame import mixer
 
 class Ultrasonic:
