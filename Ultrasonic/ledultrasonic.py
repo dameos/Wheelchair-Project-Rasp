@@ -27,7 +27,6 @@ def __display(pos, level, canv):
 
 def display_diag_pos(level, canv):
     pos = centre[3]
-    centre_list = list(centre)
     with canv as draw:
         for i in range(pos, pos + level + 1):
             draw.point((i, i), fill='red')
@@ -40,20 +39,6 @@ def display_diag_neg(level, canv):
 
 def create_canvas():
     return canvas(device)
-
-def decode_sensor(sensor, level, canv):
-    if sensor == 0:
-        display_front(level, canv)
-    if sensor == 1:
-        display_right(level, canv)
-    if sensor == 2:
-        display_left(level, canv)
-    if sensor == 3:
-        display_back(level, canv)
-    if sensor == 4:
-        display_diag_pos(level, canv)
-    if sensor == 5:
-        display_diag_neg(level, canv)
 
 def from_distance_to_level(distance):
     if distance > 30:

@@ -5,10 +5,11 @@ from pygame import mixer
 
 class Ultrasonic:
 
-    def __init__(self, trig, echo):
+    def __init__(self, trig, echo, func):
         # Atributtes
         self.__trig = trig
         self.__echo = echo
+        self.__func = func
 
         # GPIO setupt
         IO.setmode(IO.BCM)
@@ -56,3 +57,6 @@ class Ultrasonic:
     def play_sound(self):
         sound = mixer.Sound('sound.wav')
         sound.play()
+
+    def display_led(self, level, canv):
+        self.__func(level, canv)
