@@ -40,7 +40,7 @@ def display_diag_neg(level, canv):
 def create_canvas():
     return canvas(device)
 
-def from_distance_to_level(distance):
+def __from_distance_to_level(distance):
     if distance > 30:
         return 0
     if distance <= 30 and distance > 20:
@@ -49,3 +49,13 @@ def from_distance_to_level(distance):
         return 2
     if distance <= 10:
         return 3
+
+def sense_distance_enum(sensor_iter_canvas):
+    sensor = sensor_iter_canvas[0]
+    canv = sensor_iter_canvas[1]
+    i = sensor_iter_canvas[2]
+
+    distance = sensor.sense_distance()
+    print('Sensor ' + str(i) + ' : ' + str(distance))
+    sensor.display_led(__from_distance_to_level(distance), canv)
+    return distance

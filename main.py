@@ -1,10 +1,21 @@
 import sys
 import multiprocessing
+from threading import RLock
+from threading import Thread
 from Ultrasonic import ledultrasonic as led
 from Ultrasonic.ultrasonic import Ultrasonic
 from Motors.motors import Motors
 from time import sleep
 
+
+# Security system variables
+min_distance_allowed = 30
+
+# Motors and Lock declaration
+motors = Motors(pinS1=20, pinS2=21, pinBrake=19)
+motorLock = RLock()
+
+# Ultrasonic sensors declaration
 sensor1 = Ultrasonic(trig=18, echo=23, func=led.display_front)
 sensor2 = Ultrasonic(trig=24, echo=25, func=led.display_right)
 sensor3 = Ultrasonic(trig=13, echo=7,  func=led.display_left)
@@ -14,15 +25,7 @@ sensor6 = Ultrasonic(trig=19, echo=26, func=led.display_diag_neg)
 
 ultrasonic_sensors = [sensor1, sensor2, sensor3, sensor4, sensor5]
 
-def sense_and_distance(sensor_iter_canvas):
-    sensor = sensor_iter_canvas[0]
-    canv = sensor_iter_canvas[1]
-    i = sensor_iter_canvas[2]
-    distance = sensor.sense_distance()
-    print('Sensor ' + str(i) + ' : ' + str(distance))
-    sensor.display_led(led.from_distance_to_level(distance), canv)
-
-def main():
+def ultrasonic_security_system():
     canv = led.create_canvas()
     while 1:
         enumerated_sensors_canvas = []
@@ -30,10 +33,19 @@ def main():
         for i, sensor in enumerate(ultrasonic_sensors):
             enumerated_sensors_canvas.append((sensor, canv, i))
 
-        pool.map(sense_and_distance, enumerated_sensors_canvas)
+        distances = pool.map(led.sense_distance_enum, enumerated_sensors_canvas)
         pool.close()
+        if min(distances) <= min_distance_allowed:
+            try:
+                motorLock.acquire()
+                motors.drive_forward(0)
+                motors.brake()
+            finally:
+                motorLock.release()
         canv = led.create_canvas()
 
-main()
+def main():
+    security_thread = Thread(target=ultrasonic_security_system)
+
 
 
