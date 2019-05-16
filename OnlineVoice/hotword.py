@@ -122,9 +122,12 @@ def request_path_google_home():
         for event in events:
             if event.type == EventType.ON_START_FINISHED and args.query:
                 assistant.send_text_query(args.query)
-
-            return pe.process_event(event)
+            
+            print(event)
+            proc = pe.process_event(event)
+            if proc != None:
+                return proc
 
 
 if __name__ == '__main__':
-    main()
+   request_path_google_home()

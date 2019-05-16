@@ -50,12 +50,13 @@ def __from_distance_to_level(distance):
     if distance <= 10:
         return 3
 
-def sense_distance_enum(sensor_iter_canvas):
+def sense_distance_enum(sensor_iter_canvas, debug_info=False):
     sensor = sensor_iter_canvas[0]
     canv = sensor_iter_canvas[1]
     i = sensor_iter_canvas[2]
 
     distance = sensor.sense_distance()
-    print('Sensor ' + str(i) + ' : ' + str(distance))
+    if debug_info == True:
+        print('Sensor ' + str(i) + ' : ' + str(distance))
     sensor.display_led(__from_distance_to_level(distance), canv)
     return distance

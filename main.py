@@ -1,6 +1,6 @@
 import sys
 import multiprocessing
-import OnlineVoice.mappping_utils as map_utils
+from OnlineVoice import mappping_utils as map_utils
 from threading import RLock
 from threading import Thread
 from OnlineVoice import hotword
@@ -13,8 +13,8 @@ from time import sleep
 MIN_DISTANCE_ALLOWED = 30
 
 # Motors and Lock declaration
-MOTORS = Motors(pinS1=20, pinS2=21, pinBrake=19)
-motorLock = RLock()
+MOTORS = None
+motorLock = None
 
 # Ultrasonic sensors declaration
 sensor1 = Ultrasonic(trig=18, echo=23, func=led.display_front)
@@ -24,24 +24,25 @@ sensor4 = Ultrasonic(trig=12, echo=16, func=led.display_back)
 sensor5 = Ultrasonic(trig=20, echo=21, func=led.display_diag_pos)
 sensor6 = Ultrasonic(trig=19, echo=26, func=led.display_diag_neg)
 
-ultrasonic_sensors = [sensor1, sensor2, sensor3, sensor4, sensor5]
+#ultrasonic_sensors = [sensor1, sensor2, sensor3, sensor4, sensor5]
+ultrasonic_sensors = [sensor1]
 
 def ultrasonic_security_system():
     canv = led.create_canvas()
     while 1:
         enumerated_sensors_canvas = []
-        pool = multiprocessing.Pool()
         for i, sensor in enumerate(ultrasonic_sensors):
             enumerated_sensors_canvas.append((sensor, canv, i))
 
-        distances = pool.map(led.sense_distance_enum, enumerated_sensors_canvas)
-        pool.close()
+        distances = list(map(lambda x: led.sense_distance_enum(x), enumerated_sensors_canvas))
         if min(distances) <= MIN_DISTANCE_ALLOWED:
             try:
                 motorLock.acquire()
                 MOTORS.drive_forward(0)
                 MOTORS.brake()
                 while 1:
+                    print('Motor blocked')
+                    sleep(1)
                     None
             finally:
                 motorLock.release()
@@ -58,13 +59,24 @@ def autopilot_system():
             path = map_utils.flip_path_orientation(path)
         commands.execute_commands()
 
+def dummy_autopilot_system():
+    while 1:
+        try:
+            motorLock.acquire()
+            MOTORS.drive_forward(50)
+            print('I am SPEED')
+        finally:
+            motorLock.release()
+
 
 def main():
     security_thread = Thread(target=ultrasonic_security_system)
     autopilot_thread = Thread(target=autopilot_system)
 
-    security_thread.run()
-    autopilot_thread.run()
+    autopilot_thread.start()
+    security_thread.start()
 
 if __name__ == "__main__":
+    MOTORS = Motors(pinS1=20, pinS2=21, pinBrake=19)
+    motorLock = RLock()
     main()
