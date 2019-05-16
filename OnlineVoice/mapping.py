@@ -110,11 +110,12 @@ def astar(maze, start, end):
             # Add the child to the open list
             open_list.append(child)
 
-
-def calculate_and_print_maze(maze, start_place, end_place):
+def calculate_path(maze, start_place, end_place):
     start = start_place.location
     end = end_place.location
-    path = astar(maze, start, end)
+    return astar(maze, start, end)
+
+def print_path_result(path, maze):
     for tup in path:
         maze[tup[0]][tup[1]] = 2
 
@@ -127,7 +128,6 @@ def calculate_and_print_maze(maze, start_place, end_place):
                 print(colored('*', 'red'), end=' ')
             if number == 2:
                 print(colored('+', 'yellow'), end=' ')
-
 
 def find(f, seq):
     """Return first item in sequence where f(item) == True."""
@@ -154,6 +154,9 @@ def decode_place(place_str):
 
     if place_str == "fishbowl":
         return classroom
+
+    if place_str == "entrance":
+        return first_entrance
 
     return None
 

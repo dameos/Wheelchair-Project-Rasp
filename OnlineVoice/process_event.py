@@ -1,4 +1,4 @@
-import OnlineVoice.mapping
+import OnlineVoice.mapping as mapping
 import numpy as np
 import os
 from google.assistant.library.event import EventType
@@ -13,4 +13,6 @@ def process_event(event):
             end = mapping.decode_place(splitted[1])
             if start != None and  end != None:
                 maze = np.loadtxt('map.txt', delimiter=',')
-                mapping.calculate_and_print_maze(maze, start, end)
+                path = mapping.calculate_path(maze, start, end)
+                mapping.print_path_result(path, maze)
+                return path

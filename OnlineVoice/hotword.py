@@ -38,7 +38,7 @@ except NameError:
     FileNotFoundError = IOError
 
 
-def main():
+def request_path_google_home():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('--device-model-id', '--device_model_id', type=str,
