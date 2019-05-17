@@ -50,6 +50,11 @@ def ultrasonic_security_system():
 
 def autopilot_system():
     path = hotword.request_path_google_home()
+    try:
+        motorLock.acquire()
+        MOTORS.release_brake()
+    finally:
+        motorLock.release()
     for i in range(0, len(path) - 1):
         currentCoord = path[i]
         nextCoord = path[i + 1]
@@ -57,14 +62,17 @@ def autopilot_system():
         commands = map_utils.decode_dreeges_into_motor_command(angle_degrees)
         if commands.swap_path == True:
             path = map_utils.flip_path_orientation(path)
-        commands.execute_commands()
+        commands.execute_commands(motorLock, MOTORS) 
 
 def dummy_autopilot_system():
+    a = input()
     while 1:
         try:
             motorLock.acquire()
-            MOTORS.drive_forward(50)
+            MOTORS.release_brake()
+            MOTORS.drive_forward(30)
             print('I am SPEED')
+            sleep(1)
         finally:
             motorLock.release()
 
@@ -76,7 +84,22 @@ def main():
     autopilot_thread.start()
     security_thread.start()
 
+
+def get_lock():
+    global motorLock
+    return motorLock
+
+def calibrating():
+    try:
+        MOTORS.release_brake()
+        while 1:
+            print('Calibrating')
+            sleep(3)
+    except KeyboardInterrupt:
+        MOTORS.brake()
+
 if __name__ == "__main__":
     MOTORS = Motors(pinS1=20, pinS2=21, pinBrake=19)
     motorLock = RLock()
+    #calibrating()
     main()

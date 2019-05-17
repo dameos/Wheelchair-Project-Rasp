@@ -1,6 +1,4 @@
 import math
-from main import motorLock
-from main import MOTORS
 from time import sleep
 
 class MotorSingleCommand:
@@ -9,9 +7,10 @@ class MotorSingleCommand:
         self.time = time
         self.power = power
 
-    def execute_command(self):
+    def execute_command(self, motorLock, MOTORS):
         try:
             motorLock.acquire()
+            print('Executing command: ' + self.command)
             if self.command == 'forward':
                 MOTORS.drive_forward(self.power)
             if self.command == 'right':
@@ -28,16 +27,16 @@ class MotorCommands:
         self.commands = commands
         self.swap_path = swap_path
 
-    def execute_commands(self):
+    def execute_commands(self, motorLock, MOTORS):
         for command in self.commands:
-            command.execute_command()
+            command.execute_command(motorLock, MOTORS)
 
 '''
 Returns the angle in degrees between two given points following the formula:
     angle = arctan((y2 - y1 )/(x2 - x1))
 '''
 def get_angle_between_points(point1, point2):
-    inverse_tan = math.atan2((point2[0] - point1[0]), (point2[0] - point1[0])) 
+    inverse_tan = math.atan2((point2[1] - point1[1]), (point2[0] - point1[0])) 
     return math.degrees(inverse_tan)
 
 '''
@@ -50,6 +49,11 @@ def decode_dreeges_into_motor_command(degrees):
     if degrees == 0:
         forward_command = MotorSingleCommand(command='forward', time=1)
         return MotorCommands(commands=[forward_command])
+    if degrees == -45:
+        rotate_command = MotorSingleCommand(command='right', time=0.5)
+        forward_command = MotorSingleCommand(command='forward', time=1)
+        rotate_back_command = MotorSingleCommand(command='left', time=0.5)
+        return MotorCommands(commands=[rotate_command, forward_command, rotate_back_command])
     if degrees == 90:
         rotate_command = MotorSingleCommand(command='right', time=0.5)
         forward_command = MotorSingleCommand(command='forward', time=1)

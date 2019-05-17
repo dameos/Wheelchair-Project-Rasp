@@ -22,8 +22,8 @@ class Motors:
         # First state
         # Motors start at 50 since the idle state is 2.5V
         # Brakes starts LOW since the electric brake releases at 24V
-        self.__motor1.start(50)
-        self.__motor2.start(50)
+        self.__motor1.start(50.27)
+        self.__motor2.start(50.60)
         IO.output(self.__pinBrake, IO.LOW)
 
     def decode_power(self, power, inputRange, outputRange):

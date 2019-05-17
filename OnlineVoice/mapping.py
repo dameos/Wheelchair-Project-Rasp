@@ -1,6 +1,6 @@
 import numpy as np
 from termcolor import colored
-
+import numpy as np
 
 class Place():
     """A place class to store the node name and its location"""
@@ -141,10 +141,10 @@ def get_place_string(list_of_places, end_or_start):
                  ', '.join(list(map(lambda x: x.name, list_of_places))) + ' : ')
 
 def decode_place(place_str):
-    alejos_office = Place("Alejo's office", (3, 8))
-    first_entrance = Place("Entrance one", (9, 1))
+    alejos_office = Place("Alejo's office", (9, 35))
+    first_entrance = Place("Entrance one", (24, 5))
     classroom = Place("Classroom", (4, 5))
-    bathroom = Place("Bathroom", (9,8)) 
+    bathroom = Place("Bathroom", (23, 34)) 
 
     if place_str == "alejo's office":
         return alejos_office
@@ -159,4 +159,3 @@ def decode_place(place_str):
         return first_entrance
 
     return None
-

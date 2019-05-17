@@ -12,7 +12,7 @@ def process_event(event):
             start = mapping.decode_place(splitted[0])
             end = mapping.decode_place(splitted[1])
             if start != None and  end != None:
-                maze = np.loadtxt('map.txt', delimiter=',')
+                maze = np.loadtxt('OnlineVoice/map.txt', delimiter=',')
                 path = mapping.calculate_path(maze, start, end)
                 mapping.print_path_result(path, maze)
                 return path
