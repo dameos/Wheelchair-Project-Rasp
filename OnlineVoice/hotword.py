@@ -28,7 +28,6 @@ from google.assistant.library.event import EventType
 from google.assistant.library.file_helpers import existing_file
 from google.assistant.library.device_helpers import register_device
 import OnlineVoice.process_event as pe
-
 import faulthandler
 faulthandler.enable()
 
@@ -88,7 +87,7 @@ def request_path_google_home():
         pass
 
     if not args.device_model_id and not device_model_id:
-        raise Exception('Missing --device-model-id option')
+        device_model_id = 'wheelchair-7cd2c-wheelchair-0g7ygv'
 
     # Re-register if "device_model_id" is given by the user and it differs
     # from what we previously registered with.
@@ -117,7 +116,7 @@ def request_path_google_home():
                         'model_id': device_model_id,
                     }, f)
             else:
-                print(WARNING_NOT_REGISTERED)
+                print('Register')
 
         for event in events:
             if event.type == EventType.ON_START_FINISHED and args.query:
