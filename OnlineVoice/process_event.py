@@ -16,3 +16,4 @@ def process_event(event):
                 path = mapping.calculate_path(maze, start, end)
                 mapping.print_path_result(path, maze)
                 return path
+    return None

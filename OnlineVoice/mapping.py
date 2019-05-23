@@ -113,6 +113,7 @@ def astar(maze, start, end):
 def calculate_path(maze, start_place, end_place):
     start = start_place.location
     end = end_place.location
+    print('Calulating route...')
     return astar(maze, start, end)
 
 def print_path_result(path, maze):
@@ -143,7 +144,7 @@ def get_place_string(list_of_places, end_or_start):
 def decode_place(place_str):
     alejos_office = Place("Alejo's office", (9, 35))
     first_entrance = Place("Entrance one", (24, 5))
-    classroom = Place("Classroom", (4, 5))
+    classroom = Place("Classroom", (11, 15))
     bathroom = Place("Bathroom", (23, 34)) 
 
     if place_str == "alejo's office":

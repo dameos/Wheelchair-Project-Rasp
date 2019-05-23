@@ -124,7 +124,6 @@ def request_path_google_home():
             
             print(event)
             proc = pe.process_event(event)
-            print(proc)
             if proc != None:
                 return proc
 

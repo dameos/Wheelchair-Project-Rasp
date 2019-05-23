@@ -85,10 +85,6 @@ def main():
     security_thread.start()
 
 
-def get_lock():
-    global motorLock
-    return motorLock
-
 def calibrating():
     try:
         MOTORS.release_brake()

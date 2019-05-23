@@ -43,7 +43,7 @@ def get_angle_between_points(point1, point2):
 Swaps all x and y for every coord in the list of path
 '''
 def flip_path_orientation(path):
-    return list(map(lambda coord: (coord[1], coord[0])))
+    return list(map(lambda coord: (coord[1], coord[0]), path))
 
 def decode_dreeges_into_motor_command(degrees):
     if degrees == 0:
