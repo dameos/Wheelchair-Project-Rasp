@@ -1,5 +1,6 @@
 import sys
 import multiprocessing
+import speech_recognition as sr
 from OnlineVoice import mappping_utils as map_utils
 from threading import RLock
 from threading import Thread
@@ -8,6 +9,7 @@ from Ultrasonic import ledultrasonic as led
 from Ultrasonic.ultrasonic import Ultrasonic
 from Motors.motors import Motors
 from time import sleep
+from tensorflow.contrib.framework.python.ops import audio_ops as contrib_audio
 
 # Security system variables
 MIN_DISTANCE_ALLOWED = 30
@@ -62,7 +64,7 @@ def autopilot_system():
         commands = map_utils.decode_dreeges_into_motor_command(angle_degrees)
         if commands.swap_path == True:
             path = map_utils.flip_path_orientation(path)
-        commands.execute_commands(motorLock, MOTORS) 
+        commands.execute_commands(motorLock, MOTORS)
 
 def dummy_autopilot_system():
     a = input()
@@ -76,6 +78,25 @@ def dummy_autopilot_system():
         finally:
             motorLock.release()
 
+def recognize_command_callback(recognizer, audio):
+    try:
+        spoken = recognizer.recognize_tensorflow(audio)
+        print(spoken)
+    except sr.UnknownValueError:
+        print("Tensorflow could not understand audio")
+    except sr.RequestError as e:
+        print("Could not request results from Tensorflow service; {0}".format(e))
+
+def offline_voice_recognizer():
+    r = sr.Recognizer()
+    m = sr.Microphone()
+    with m as source:
+        r.adjust_for_ambient_noise(source)
+
+    stop_listening = r.listen_in_background(m, recognize_command_callback, phrase_time_limit=0.6)
+    for _ in range(50): sleep(0.1)
+
+    stop_listening(wait_for_stop=False)
 
 def main():
     security_thread = Thread(target=ultrasonic_security_system)
