@@ -14,6 +14,7 @@ from time import sleep
 # Runtime variables
 RUN_OFFLINE_THREAD = True
 queue_ans = queue.Queue()
+audio_queue = queue.Queue()
 
 # Security system variables
 MIN_DISTANCE_ALLOWED = 30
@@ -86,10 +87,12 @@ def dummy_autopilot_system():
         finally:
             motorLock.release()
 
-def recognize_command_callback(recognizer, audio):
-    try:
-        spoken = recognizer.recognize_tensorflow(audio)
+def recognize_command_worker(recognizer):
+    while True:
+        audio = audio_queue.get()
+        if audio is None: break
         try:
+            spoken = recognizer.recognize_tensorflow(audio)
             motorLock.acquire()
             print(spoken)
             if MOTORS.isBrakeActive():
@@ -107,25 +110,24 @@ def recognize_command_callback(recognizer, audio):
                 if not MOTORS.isBrakeActive():
                     MOTORS.brake()
 
+        except sr.UnknownValueError:
+            print("Tensorflow could not understand audio")
+        except sr.RequestError as e:
+            print("Could not request results from Tensorflow service; {0}".format(e))
+
         finally:
             motorLock.release()
 
-    except sr.UnknownValueError:
-        print("Tensorflow could not understand audio")
-    except sr.RequestError as e:
-        print("Could not request results from Tensorflow service; {0}".format(e))
 
 def offline_voice_recognizer():
     r = sr.Recognizer()
-    m = sr.Microphone()
-    with m as source:
-        r.adjust_for_ambient_noise(source)
-
-    stop_listening = r.listen_in_background(m, recognize_command_callback, phrase_time_limit=0.6)
-    print('Speak up')
-    while True:
-        sleep(0.1)
-    stop_listening(wait_for_stop=False)
+    recognize_thread = Thread(target=recognize_command_worker, args=[r])
+    with sr.Microphone() as source:
+        try:
+            while True:
+                audio_queue.put(r.listen(source))
+        except KeyboardInterrupt:
+            pass
 
 def main():
     security_thread = Thread(target=ultrasonic_security_system, daemon=True)
