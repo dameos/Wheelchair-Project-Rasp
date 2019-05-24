@@ -91,6 +91,7 @@ def recognize_command_callback(recognizer, audio):
         spoken = recognizer.recognize_tensorflow(audio)
         try:
             motorLock.acquire()
+            print(spoken)
             if MOTORS.isBrakeActive():
                 MOTORS.release_brake()
             if spoken == 'go':
@@ -101,7 +102,7 @@ def recognize_command_callback(recognizer, audio):
                 MOTORS.drive_left(OFFLINE_SYSTEM_POWER)
             if spoken == 'down':
                 MOTORS.drive_backward(OFFLINE_SYSTEM_POWER)
-            if spoken == 'stop' or spoken == 'off':
+            if spoken == 'stop' or spoken == 'off' or spoken == 'up':
                 MOTORS.drive_forward(0)
                 if not MOTORS.isBrakeActive():
                     MOTORS.brake()
@@ -121,9 +122,10 @@ def offline_voice_recognizer():
         r.adjust_for_ambient_noise(source)
 
     stop_listening = r.listen_in_background(m, recognize_command_callback, phrase_time_limit=0.6)
+    print('Speak up')
     while True:
         sleep(0.1)
-        stop_listening(wait_for_stop=False)
+    stop_listening(wait_for_stop=False)
 
 def main():
     security_thread = Thread(target=ultrasonic_security_system, daemon=True)
@@ -136,10 +138,18 @@ def main():
     # Run autopilot otherwise
     if RUN_OFFLINE_THREAD == True:
         from tensorflow.contrib.framework.python.ops import audio_ops as contrib_audio
+        print('Import done')
         offline_thread = Thread(target=offline_voice_recognizer, daemon=True)
         offline_thread.start()
     else:
         autopilot_thread.start()
+
+
+    try:
+        while True:
+            pass
+    except KeyboardInterrupt:
+        print('Finishing execution...')
 
 def calibrating():
     try:

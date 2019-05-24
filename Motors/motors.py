@@ -1,8 +1,10 @@
 import RPi.GPIO as IO
+from termcolor import colored
 
 class Motors:
     DEFAULTINPUTRANGE = (0, 100)
     FREQUENCY = 1000
+    VERBOSE = True
 
     def __init__(self, pinS1, pinS2, pinBrake, isBraked=False):
         self.__pinS1 = pinS1
@@ -38,22 +40,30 @@ class Motors:
         return temp
 
     def drive_forward(self, power):
+        if self.VERBOSE:
+            self.print_command('Forward', power)
         decoded_power = self.decode_power(power, self.DEFAULTINPUTRANGE, (50, 100))
         self.__motor1.ChangeDutyCycle(decoded_power)
         self.__motor2.ChangeDutyCycle(decoded_power)
 
     def drive_backward(self, power):
+        if self.VERBOSE:
+            self.print_command('Backward', power)
         decoded_power = self.decode_power(power, self.DEFAULTINPUTRANGE, (50, 0))
         self.__motor1.ChangeDutyCycle(decoded_power)
         self.__motor2.ChangeDutyCycle(decoded_power)
 
     def drive_right(self, power):
+        if self.VERBOSE:
+            self.print_command('Right', power)
         decoded_power = self.decode_power(power, self.DEFAULTINPUTRANGE, (50, 100))
         negative_decoded_power = self.decode_power(power, self.DEFAULTINPUTRANGE, (50, 0))
         self.__motor2.ChangeDutyCycle(decoded_power)
         self.__motor1.ChangeDutyCycle(negative_decoded_power)
 
     def drive_left(self, power):
+        if self.VERBOSE:
+            self.print_command('Left', power)
         decoded_power = self.decode_power(power, self.DEFAULTINPUTRANGE, (50, 100))
         negative_decoded_power = self.decode_power(power, self.DEFAULTINPUTRANGE, (50, 0))
         self.__motor1.ChangeDutyCycle(decoded_power)
@@ -69,3 +79,6 @@ class Motors:
 
     def isBrakeActive(self):
         return self.__isBraked
+
+    def print_command(self, command, power):
+        print(colored('Executing command: ' + command + ' at ' + str(power) + '%', 'green'))
