@@ -4,27 +4,33 @@ class Motors:
     DEFAULTINPUTRANGE = (0, 100)
     FREQUENCY = 1000
 
-    def __init__(self, pinS1, pinS2, pinBrake):
+    def __init__(self, pinS1, pinS2, pinBrake, isBraked=False):
         self.__pinS1 = pinS1
         self.__pinS2 = pinS2
         self.__pinBrake = pinBrake
+        self.__isBraked = isBraked
 
         # Setting up pins
         IO.setmode(IO.BCM)
         IO.setup(self.__pinS1, IO.OUT)
         IO.setup(self.__pinS2, IO.OUT)
-        IO.setup(pinBrake, IO.OUT)
+        IO.setup(self.__pinBrake, IO.OUT)
 
         # Motor variables
         self.__motor1 = IO.PWM(pinS1, self.FREQUENCY)
         self.__motor2 = IO.PWM(pinS2, self.FREQUENCY)
 
         # First state
-        # Motors start at 50 since the idle state is 2.5V
-        # Brakes starts LOW since the electric brake releases at 24V
+        # Motors start at some point around 50% since the idle state is 2.5V
+        # Brakes starts at isBraked
         self.__motor1.start(50.27)
         self.__motor2.start(50.60)
-        IO.output(self.__pinBrake, IO.LOW)
+
+        if self.__isBraked == True:
+            self.brake()
+        else:
+            self.release_brake()
+
 
     def decode_power(self, power, inputRange, outputRange):
         left_factor = (power-inputRange[0])/(inputRange[1]-inputRange[0])
@@ -54,7 +60,12 @@ class Motors:
         self.__motor2.ChangeDutyCycle(negative_decoded_power)
 
     def brake(self):
+        self.__isBraked = True
         IO.output(self.__pinBrake, IO.LOW)
 
     def release_brake(self):
+        self.__isBraked = False
         IO.output(self.__pinBrake, IO.HIGH)
+
+    def isBrakeActive(self):
+        return self.__isBraked

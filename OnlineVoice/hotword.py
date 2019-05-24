@@ -29,6 +29,7 @@ from google.assistant.library.file_helpers import existing_file
 from google.assistant.library.device_helpers import register_device
 import OnlineVoice.process_event as pe
 import faulthandler
+import sys
 faulthandler.enable()
 
 try:
@@ -37,7 +38,7 @@ except NameError:
     FileNotFoundError = IOError
 
 
-def request_path_google_home():
+def request_path_google_home(queue):
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('--device-model-id', '--device_model_id', type=str,
@@ -125,7 +126,8 @@ def request_path_google_home():
             print(event)
             proc = pe.process_event(event)
             if proc != None:
-                return proc
+                queue.put(proc)
+                sys.exit()
 
 
 if __name__ == '__main__':
