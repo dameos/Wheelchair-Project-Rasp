@@ -1,5 +1,6 @@
 import multiprocessing
 import sys
+import signal
 from threading import RLock, Thread
 from time import sleep
 from queue import Queue
@@ -14,6 +15,7 @@ from OfflineVoice.snowboy_detector import start_snowboy_detector
 # Runtime variables
 RUN_OFFLINE_THREAD = True
 queue_ans = Queue()
+interrupted = False
 
 # Security system variables
 MIN_DISTANCE_ALLOWED = 30
@@ -33,6 +35,16 @@ sensor6 = Ultrasonic(trig=19, echo=26, func=led.display_diag_neg)
 
 #ultrasonic_sensors = [sensor1, sensor2, sensor3, sensor4, sensor5]
 ultrasonic_sensors = [sensor1]
+
+def signal_handler(signal, frame):
+    global interrupted
+    interrupted = True
+
+def interrupt_callback():
+    global interrupted
+    return interrupted
+
+signal.signal(signal.SIGINT, signal_handler)
 
 def ultrasonic_security_system():
     canv = led.create_canvas()
@@ -88,8 +100,9 @@ def offline_voice_recognizer():
     models = [stop_model, forward_model, left_model, right_model, backwards_model]
     callbacks = [stop_model_callback, forward_model_callback, left_model_callback, right_model_callback, backwards_model_callback]
 
-    start_snowboy_detector(models=models, callbacks=callbacks)
-
+    detector = start_snowboy_detector(models=models)
+    detector.start(detected_callback=callbacks, interrupt_check=interrupt_callback ,sleep_time=0.03)
+    detector.terminate()
 
 def stop_model_callback():
     try:
