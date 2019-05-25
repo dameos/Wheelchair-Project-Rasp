@@ -6,14 +6,14 @@ from time import sleep
 from queue import Queue
 
 from Motors.motors import Motors
-from OnlineVoice import hotword
+from OnlineVoice.hotword import request_path_google_home
 from OnlineVoice import mappping_utils as map_utils
 from Ultrasonic import ledultrasonic as led
 from Ultrasonic.ultrasonic import Ultrasonic
 from OfflineVoice.snowboy_detector import start_snowboy_detector
 
 # Runtime variables
-RUN_OFFLINE_THREAD = True
+RUN_OFFLINE_THREAD = False
 queue_ans = Queue()
 interrupted = False
 
@@ -69,7 +69,14 @@ def ultrasonic_security_system():
         canv = led.create_canvas()
 
 def autopilot_system():
-    path = hotword.request_path_google_home(queue_ans)
+    google_home_thread = Thread(target=request_path_google_home, args=(queue_ans, )) 
+    
+    google_home_thread.start()
+    while queue_ans.empty():
+        sleep(0.1)
+
+    path = queue_ans.get()
+
     try:
         motorLock.acquire()
         if MOTORS.isBrakeActive():
@@ -151,7 +158,7 @@ def main():
 
     try:
         while True:
-            pass
+            sleep(0.1)
     except KeyboardInterrupt:
         print('Finishing execution...')
 

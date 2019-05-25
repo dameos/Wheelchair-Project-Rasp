@@ -124,10 +124,7 @@ def request_path_google_home(queue):
                 assistant.send_text_query(args.query)
             
             print(event)
-            proc = pe.process_event(event)
-            if proc != None:
-                queue.put(proc)
-                sys.exit()
+            pe.process_event(event, queue.put)
 
 
 if __name__ == '__main__':

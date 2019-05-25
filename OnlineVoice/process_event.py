@@ -3,7 +3,7 @@ import numpy as np
 import os
 from google.assistant.library.event import EventType
 
-def process_event(event):
+def process_event(event, queue_put):
     if event.type == EventType.ON_RENDER_RESPONSE:
         text = event.args["text"]
         text_replaced =  text.replace("Going from", "")
@@ -15,5 +15,4 @@ def process_event(event):
                 maze = np.loadtxt('OnlineVoice/map.txt', delimiter=',')
                 path = mapping.calculate_path(maze, start, end)
                 mapping.print_path_result(path, maze)
-                return path
-    return None
+                queue_put(path)
