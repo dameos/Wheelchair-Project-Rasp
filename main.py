@@ -69,7 +69,7 @@ def ultrasonic_security_system():
         canv = led.create_canvas()
 
 def autopilot_system():
-    google_home_thread = Thread(target=request_path_google_home, args=(queue_ans, )) 
+    google_home_thread = Thread(target=request_path_google_home, daemon=True, args=(queue_ans, )) 
     
     google_home_thread.start()
     while queue_ans.empty():
