@@ -1,20 +1,19 @@
-import sys
 import multiprocessing
-import queue
-import speech_recognition as sr
-from OnlineVoice import mappping_utils as map_utils
-from threading import RLock
-from threading import Thread
+import sys
+from threading import RLock, Thread
+from time import sleep
+from queue import Queue
+
+from Motors.motors import Motors
 from OnlineVoice import hotword
+from OnlineVoice import mappping_utils as map_utils
 from Ultrasonic import ledultrasonic as led
 from Ultrasonic.ultrasonic import Ultrasonic
-from Motors.motors import Motors
-from time import sleep
+from OfflineVoice.snowboy_detector import start_snowboy_detector
 
 # Runtime variables
 RUN_OFFLINE_THREAD = True
-queue_ans = queue.Queue()
-audio_queue = queue.Queue()
+queue_ans = Queue()
 
 # Security system variables
 MIN_DISTANCE_ALLOWED = 30
@@ -74,6 +73,40 @@ def autopilot_system():
             path = map_utils.flip_path_orientation(path)
         commands.execute_commands(motorLock, MOTORS)
 
+def offline_voice_recognizer():
+    stop_model = 'OfflineVoice/resources/models/parar.pmdl'
+    forward_model = 'OfflineVoice/resources/models/adelante.pmdl'
+    left_model = 'OfflineVoice/resources/models/izquierda.pmdl'
+    right_model = 'OfflineVoice/resources/models/derecha.pmdl'
+    backwards_model = 'OfflineVoice/resources/models/atras.pmdl'
+
+    forward_model_callback = lambda: generic_model_callback(MOTORS.drive_forward)
+    left_model_callback = lambda: generic_model_callback(MOTORS.drive_left)
+    right_model_callback = lambda: generic_model_callback(MOTORS.drive_right)
+    backwards_model_callback = lambda: generic_model_callback(MOTORS.drive_backward)
+
+    models = [stop_model, forward_model, left_model, right_model, backwards_model]
+    callbacks = [stop_model_callback, forward_model_callback, left_model_callback, right_model_callback, backwards_model_callback]
+
+    start_snowboy_detector(models=models, callbacks=callbacks)
+
+
+def stop_model_callback():
+    try:
+        motorLock.acquire()
+        MOTORS.drive_forward(0)
+        if not MOTORS.isBrakeActive():
+            MOTORS.brake()
+    finally:
+        motorLock.release()
+
+def generic_model_callback(motor_command):
+    try:
+        motorLock.acquire()
+        motor_command(OFFLINE_SYSTEM_POWER)
+    finally:
+        motorLock.release()
+
 def dummy_autopilot_system():
     a = input()
     while 1:
@@ -87,47 +120,6 @@ def dummy_autopilot_system():
         finally:
             motorLock.release()
 
-def recognize_command_worker(recognizer):
-    while True:
-        audio = audio_queue.get()
-        if audio is None: break
-        try:
-            spoken = recognizer.recognize_tensorflow(audio)
-            motorLock.acquire()
-            print(spoken)
-            if MOTORS.isBrakeActive():
-                MOTORS.release_brake()
-            if spoken == 'go':
-                MOTORS.drive_forward(OFFLINE_SYSTEM_POWER)
-            if spoken == 'right':
-                MOTORS.drive_right(OFFLINE_SYSTEM_POWER)
-            if spoken == 'left':
-                MOTORS.drive_left(OFFLINE_SYSTEM_POWER)
-            if spoken == 'down':
-                MOTORS.drive_backward(OFFLINE_SYSTEM_POWER)
-            if spoken == 'stop' or spoken == 'off' or spoken == 'up':
-                MOTORS.drive_forward(0)
-                if not MOTORS.isBrakeActive():
-                    MOTORS.brake()
-
-        except sr.UnknownValueError:
-            print("Tensorflow could not understand audio")
-        except sr.RequestError as e:
-            print("Could not request results from Tensorflow service; {0}".format(e))
-
-        finally:
-            motorLock.release()
-
-
-def offline_voice_recognizer():
-    r = sr.Recognizer()
-    recognize_thread = Thread(target=recognize_command_worker, args=[r])
-    with sr.Microphone() as source:
-        try:
-            while True:
-                audio_queue.put(r.listen(source))
-        except KeyboardInterrupt:
-            pass
 
 def main():
     security_thread = Thread(target=ultrasonic_security_system, daemon=True)
@@ -139,13 +131,10 @@ def main():
     # Run offline voice pattern thread if env var is set to True
     # Run autopilot otherwise
     if RUN_OFFLINE_THREAD == True:
-        from tensorflow.contrib.framework.python.ops import audio_ops as contrib_audio
-        print('Import done')
         offline_thread = Thread(target=offline_voice_recognizer, daemon=True)
         offline_thread.start()
     else:
         autopilot_thread.start()
-
 
     try:
         while True:
