@@ -12,20 +12,22 @@ from Ultrasonic import ledultrasonic as led
 from Ultrasonic.ultrasonic import Ultrasonic
 from OfflineVoice.snowboy_detector import start_snowboy_detector
 
-# Runtime variables
+''' Runtime variables '''
+# If it's set to True the offline system will run
+# Will run the autopilot thread otherwise
 RUN_OFFLINE_THREAD = False
 queue_ans = Queue()
 interrupted = False
 
-# Security system variables
+''' Security system variables '''
 MIN_DISTANCE_ALLOWED = 30
 OFFLINE_SYSTEM_POWER = 40
 
-# Motors and Lock declaration
+''' Motors and Lock declaration '''
 MOTORS = None
 motorLock = None
 
-# Ultrasonic sensors declaration
+''' Ultrasonic sensors declaration '''
 sensor1 = Ultrasonic(trig=18, echo=23, func=led.display_front)
 sensor2 = Ultrasonic(trig=24, echo=25, func=led.display_right)
 sensor3 = Ultrasonic(trig=13, echo=7,  func=led.display_left)
@@ -69,28 +71,30 @@ def ultrasonic_security_system():
         canv = led.create_canvas()
 
 def autopilot_system():
-    google_home_thread = Thread(target=request_path_google_home, daemon=True, args=(queue_ans, )) 
-    
-    google_home_thread.start()
-    while queue_ans.empty():
-        sleep(0.1)
-
-    path = queue_ans.get()
-
     try:
-        motorLock.acquire()
-        if MOTORS.isBrakeActive():
-            MOTORS.release_brake()
-    finally:
-        motorLock.release()
-    for i in range(0, len(path) - 1):
-        currentCoord = path[i]
-        nextCoord = path[i + 1]
-        angle_degrees = map_utils.get_angle_between_points(currentCoord, nextCoord)
-        commands = map_utils.decode_dreeges_into_motor_command(angle_degrees)
-        if commands.swap_path == True:
-            path = map_utils.flip_path_orientation(path)
-        commands.execute_commands(motorLock, MOTORS)
+        google_home_thread = Thread(target=request_path_google_home, daemon=True, args=(queue_ans, ))  
+        google_home_thread.start()
+        while queue_ans.empty():
+            sleep(0.1)
+
+        path = queue_ans.get()
+
+        try:
+            motorLock.acquire()
+            if MOTORS.isBrakeActive():
+                MOTORS.release_brake()
+        finally:
+            motorLock.release()
+        for i in range(0, len(path) - 1):
+            currentCoord = path[i]
+            nextCoord = path[i + 1]
+            angle_degrees = map_utils.get_angle_between_points(currentCoord, nextCoord)
+            commands = map_utils.decode_dreeges_into_motor_command(angle_degrees)
+            if commands.swap_path == True:
+                path = map_utils.flip_path_orientation(path)
+            commands.execute_commands(motorLock, MOTORS)
+    except KeyboardInterrupt:
+        pass
 
 def offline_voice_recognizer():
     stop_model = 'OfflineVoice/resources/models/parar.pmdl'
@@ -156,11 +160,9 @@ def main():
     else:
         autopilot_thread.start()
 
-    try:
-        while True:
-            sleep(0.1)
-    except KeyboardInterrupt:
-        print('Finishing execution...')
+    while not interrupted:
+        pass
+    print('Finishing execution...')
 
 def calibrating():
     try:
