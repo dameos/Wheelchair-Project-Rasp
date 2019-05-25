@@ -1,8 +1,8 @@
 # These two are mutually exclusive
 # The two can't be set to 'yes' or 'no' at the same time
 general:
-    use_autopilot: yes
-    use_manual: no
+    use_autopilot: no
+    use_manual: yes
 
 ultrasonic_sensors:
     min_distance_allowed: 30

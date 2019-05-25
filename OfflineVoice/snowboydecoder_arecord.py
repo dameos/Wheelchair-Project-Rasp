@@ -90,7 +90,7 @@ class HotwordDetector(object):
             self.detector.NumChannels() * self.detector.SampleRate() * 5)
 
     def record_proc(self):
-        os.system('killall arecord')
+        #os.system('killall arecord')
         CHUNK = 2048
         RECORD_RATE = 16000
         cmd = 'arecord -q -r %d -f S16_LE' % RECORD_RATE

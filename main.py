@@ -1,11 +1,12 @@
 import multiprocessing
 import signal
 import sys
+import yaml
+import RPi.GPIO as GPIO
 from queue import Queue
 from threading import RLock, Thread
 from time import sleep
 
-import yaml
 from pygame import mixer
 from termcolor import colored
 
@@ -60,9 +61,9 @@ def ultrasonic_security_system():
         enumerated_sensors_canvas = []
         for i, sensor in enumerate(ultrasonic_sensors):
             enumerated_sensors_canvas.append((sensor, canv, i))
-
         distances = list(
             map(lambda x: led.sense_distance_enum(x), enumerated_sensors_canvas))
+
         if min(distances) <= MIN_DISTANCE_ALLOWED:
             try:
                 motorLock.acquire()
@@ -176,6 +177,7 @@ def main():
     while not interrupted:
         pass
     print(colored('Finishing execution...', 'blue'))
+    GPIO.cleanup()
 
 
 def calibrating():
@@ -190,11 +192,14 @@ def calibrating():
 
 def decode_ultrasonic(sensors):
     ultrasonic_ans = []
-    for sensor in sensors:
+    for num, sensor_raw in enumerate(sensors):
+        sensor = sensor_raw['sensor' + str(num + 1)]
         led_func = led.decode_func_sensor(sensor['led'])
         ultrasonic = Ultrasonic(
             trig=sensor['trigger'], echo=sensor['echo'], func=led_func)
+        print(sensor['echo'])
         ultrasonic_ans.append(ultrasonic)
+
     return ultrasonic_ans
 
 
@@ -205,7 +210,7 @@ def print_error_and_exit(error_msg):
 
 if __name__ == "__main__":
     with open('config.yaml', 'r') as ymlfile:
-        cfg = yaml.load(ymlfile)
+        cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
     # Main configuration
     RUN_OFFLINE_THREAD = cfg['general']['use_manual']
@@ -220,8 +225,7 @@ if __name__ == "__main__":
 
     # Ultrasonic config
     MIN_DISTANCE_ALLOWED = cfg['ultrasonic_sensors']['min_distance_allowed']
-    ultrasonic_sensors = decode_ultrasonic(
-        cfg['ultrasonic_sensors']['sensors'])
+    ultrasonic_sensors = decode_ultrasonic(cfg['ultrasonic_sensors']['sensors'])
 
     # Motor config
     MOTORS = Motors(pinS1=cfg['motors']['pin_s1'], pinS2=cfg['motors']
