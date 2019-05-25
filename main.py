@@ -196,8 +196,7 @@ def decode_ultrasonic(sensors):
         sensor = sensor_raw['sensor' + str(num + 1)]
         led_func = led.decode_func_sensor(sensor['led'])
         ultrasonic = Ultrasonic(
-            trig=sensor['trigger'], echo=sensor['echo'], func=led_func)
-        print(sensor['echo'])
+            trig=int(sensor['trigger']), echo=int(sensor['echo']), func=led_func)
         ultrasonic_ans.append(ultrasonic)
 
     return ultrasonic_ans

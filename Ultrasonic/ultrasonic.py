@@ -57,8 +57,11 @@ class Ultrasonic:
         return avg
 
     def play_sound(self):
-        sound = mixer.Sound('sound.wav')
+        sound = mixer.Sound('Ultrasonic/sound.wav')
         sound.play()
 
     def display_led(self, level, canv):
         self.__func(level, canv)
+
+    def get_echo(self):
+        return self.__echo
