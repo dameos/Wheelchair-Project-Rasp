@@ -1,0 +1,41 @@
+# These two are mutually exclusive
+# The two can't be set to 'yes' or 'no' at the same time
+general:
+    use_autopilot: yes
+    use_manual: no
+
+ultrasonic_sensors:
+    min_distance_allowed: 30
+    sensors:
+        - sensor1:
+            trigger: 5
+            echo: 18
+        - sensor2:
+            trigger: 9
+            echo: 12
+        - sensor3:
+            trigger: 7
+            echo: 22
+        - sensor4:
+            trigger: 17
+            echo: 27
+        - sensor5:
+            trigger: 24
+            echo: 25
+        - sensor6:
+            trigger: 18
+            echo: 23
+
+motors:
+    pin_s1: 4
+    pin_s2: 5
+    pin_brake: 2
+
+offline_voice:
+    motor_power: 40
+    models:
+        - stop_model: 'OfflineVoice/resources/models/parar.pmdl'
+        - forward_model: 'OfflineVoice/resources/models/adelante.pmdl'
+        - left_model: 'OfflineVoice/resources/models/izquierda.pmdl'
+        - right_model: 'OfflineVoice/resources/models/derecha.pmdl'
+        - backwards_model: 'OfflineVoice/resources/models/atras.pmdl'

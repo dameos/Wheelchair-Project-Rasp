@@ -1,9 +1,11 @@
 import multiprocessing
 import sys
 import signal
+import yaml
 from threading import RLock, Thread
 from time import sleep
 from queue import Queue
+from pygame import mixer
 
 from Motors.motors import Motors
 from OnlineVoice.hotword import request_path_google_home
@@ -60,12 +62,12 @@ def ultrasonic_security_system():
             try:
                 motorLock.acquire()
                 MOTORS.drive_forward(0)
+                ultrasonic_sensors[0].play_sound()
                 if not MOTORS.isBrakeActive:
                     MOTORS.brake()
-                while 1:
+                while True:
                     print('Motor blocked')
                     sleep(1)
-                    None
             finally:
                 motorLock.release()
         canv = led.create_canvas()
@@ -78,7 +80,8 @@ def autopilot_system():
             sleep(0.1)
 
         path = queue_ans.get()
-
+        song = mixer.sound('OnlineVoice/iluminatti.wav')
+        song.play()
         try:
             motorLock.acquire()
             if MOTORS.isBrakeActive():
@@ -174,6 +177,9 @@ def calibrating():
         MOTORS.brake()
 
 if __name__ == "__main__":
+    with open('config.yaml', 'r') as ymlfile:
+        cfg = yaml.load(ymlfile)
+
     MOTORS = Motors(pinS1=20, pinS2=21, pinBrake=19)
     motorLock = RLock()
     #calibrating()

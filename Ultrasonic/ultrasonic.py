@@ -1,6 +1,9 @@
-import RPi.GPIO as IO
 import time
+
 from pygame import mixer
+
+import RPi.GPIO as IO
+
 
 class Ultrasonic:
 
