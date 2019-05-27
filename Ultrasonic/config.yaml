@@ -10,21 +10,27 @@ ultrasonic_sensors:
         - sensor1:
             trigger: 5
             echo: 18
+            led: 'front'
         - sensor2:
             trigger: 9
             echo: 12
+            led: 'right'
         - sensor3:
             trigger: 7
             echo: 22
+            led: 'left'
         - sensor4:
             trigger: 17
             echo: 27
+            led: 'back'
         - sensor5:
             trigger: 24
             echo: 25
+            led: 'diag_pos'
         - sensor6:
             trigger: 18
             echo: 23
+            led: 'diag_neg'
 
 motors:
     pin_s1: 4
@@ -34,8 +40,8 @@ motors:
 offline_voice:
     motor_power: 40
     models:
-        - stop_model: 'OfflineVoice/resources/models/parar.pmdl'
-        - forward_model: 'OfflineVoice/resources/models/adelante.pmdl'
-        - left_model: 'OfflineVoice/resources/models/izquierda.pmdl'
-        - right_model: 'OfflineVoice/resources/models/derecha.pmdl'
-        - backwards_model: 'OfflineVoice/resources/models/atras.pmdl'
+        stop_model: 'OfflineVoice/resources/models/parar.pmdl'
+        forward_model: 'OfflineVoice/resources/models/adelante.pmdl'
+        left_model: 'OfflineVoice/resources/models/izquierda.pmdl'
+        right_model: 'OfflineVoice/resources/models/derecha.pmdl'
+        backwards_model: 'OfflineVoice/resources/models/atras.pmdl'

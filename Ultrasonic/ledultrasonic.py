@@ -60,3 +60,17 @@ def sense_distance_enum(sensor_iter_canvas, debug_info=False):
         print('Sensor ' + str(i) + ' : ' + str(distance))
     sensor.display_led(__from_distance_to_level(distance), canv)
     return distance
+
+def decode_func_sensor(func_string):
+    if func_string == 'front':
+        return display_front
+    if func_string == 'right':
+        return display_right
+    if func_string == 'left':
+        return display_left
+    if func_string == 'back':
+        return display_back
+    if func_string == 'diag_pos':
+        return display_diag_pos
+    if func_string == 'diag_neg':
+        return display_diag_neg
